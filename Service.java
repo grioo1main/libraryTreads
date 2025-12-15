@@ -60,10 +60,8 @@ public class Service {
         }
     }
 
-    public void readAllBooks() {
-        library.getBooks().stream()
-                .forEach(System.out::println);
-
+    public List<Book> AllBooks() {
+        return library.getBooks().stream().collect(Collectors.toList());
     }
 
     public void addBook(Book book) {
@@ -72,16 +70,15 @@ public class Service {
 
     }
 
-    public void readMyBook(User user) {
+    public List<Book> readMyBook(User user) {
     List<Book> userBooks = library.getBooks().stream()
         .filter(b -> b.getOwner() != null && b.getOwner().getId().equals(user.getId()))
         .collect(Collectors.toList());
     
     if (userBooks.isEmpty()) {
-        System.out.println("У пользователя нет книг");
+        return null;
     } else {
-        userBooks.forEach(System.out::println);
-        System.out.println("Найдено книг: " + userBooks.size());
+       return userBooks;
     }
 }
 
@@ -117,9 +114,17 @@ public class Service {
         }
     }
 
-    public void readAllNOOwnerBook(){
-        library.getBooks().stream()
+    public List<Book> AllNOOwnerBook(){
+         return library.getBooks().stream()
                 .sorted(Comparator.comparing(b -> b.getOwner() == null))
-                .forEach(System.out::println);
+                .collect(Collectors.toList());
+    }
+
+    public List<User> AllUsers(){
+        return library.getUsers().stream().collect(Collectors.toList());
+    }
+
+    public Book getBookById(int id){
+        return library.getBooks().stream().filter(b -> b.getId() == id).findFirst().get();
     }
 }
