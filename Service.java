@@ -1,5 +1,7 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -16,21 +18,23 @@ public class Service {
 
     {
         try (BufferedReader reader = new BufferedReader(
-                new FileReader("/media/mint1grio/Новый том/MyOtherProject/libraly/books.csv"))) {
+                new FileReader("books.csv"))) {
+
+                    System.out.println("yfx");
 
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(";");
 
                 // Проверяем, что строка корректная
-                if (parts.length >= 4) {
+                if (parts.length >= 3) {
                     String name = parts[0]; // название
                     String author = parts[1]; // автор
-                    int id = Integer.parseInt(parts[2]); // ID
-                    int year = Integer.parseInt(parts[3]); // год
+                    int year = Integer.parseInt(parts[2]); // ID
+                    Integer ownerId = parts.length == 4 ? Integer.parseInt(parts[3]) : null; // владелец
 
                     // Предполагаем конструктор: Book(name, year, new User(author))
-                    library.getBooks().add(new Book(name, year, author));
+                    library.getBooks().add(new Book(name, year, author , ownerId));
                 }
             }
         } catch (Exception e) {
@@ -72,7 +76,7 @@ public class Service {
 
     public List<Book> readMyBook(User user) {
     List<Book> userBooks = library.getBooks().stream()
-        .filter(b -> b.getOwner() != null && b.getOwner().getId().equals(user.getId()))
+        .filter(b -> b.getOwnerId() != null && b.getOwnerId().equals(user.getId()))
         .collect(Collectors.toList());
     
     if (userBooks.isEmpty()) {
@@ -90,10 +94,10 @@ public class Service {
 
         Book book2 = book.orElse(null);
 
-        if (book.isPresent() && (book2.getOwner() == null)) {
+        if (book.isPresent() && (book2.getOwnerId() == null)) {
 
             // логика взятия книги пользователем
-            book2.setOwner(user); // или что-то подобное
+            book2.setOwnerId(user.getId()); // или что-то подобное
             System.out.println("Книга " + book2.getName() + " взята пользователем " + user.getName());
         } else {
             System.out.println("Книга с ID " + id + " не найдена или взята другим пользователем");
@@ -102,12 +106,12 @@ public class Service {
 
     public void returnBook(User user, Integer id) {
         List<Book> books = library.getBooks().stream()
-                .filter(b -> b.getOwner() != null && b.getOwner().getId().equals(user.getId()))
+                .filter(b -> b.getOwnerId() != null && b.getOwnerId().equals(user.getId()))
                 .collect(Collectors.toList());
         Optional<Book> bookOPT = books.stream().filter(b -> b.getId() == id).findFirst();
         if (bookOPT.isPresent()){
             Book book = bookOPT.get();
-            book.setOwner(null);
+            book.setOwnerId(null);
             System.out.println("Книга успешно возварщена");
         } else {
             System.out.println("Ошибка , проверьте корректность ID");
@@ -116,7 +120,7 @@ public class Service {
 
     public List<Book> AllNOOwnerBook(){
          return library.getBooks().stream()
-                .sorted(Comparator.comparing(b -> b.getOwner() == null))
+                .sorted(Comparator.comparing(b -> b.getOwnerId() == null))
                 .collect(Collectors.toList());
     }
 
@@ -126,5 +130,15 @@ public class Service {
 
     public Book getBookById(int id){
         return library.getBooks().stream().filter(b -> b.getId() == id).findFirst().get();
+    }
+
+    public void save(){
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("books.csv"))) {
+            for (Book book : library.getBooks()) {
+                writer.write(book.getName() + ";" + book.getAuthor() + ";" + book.getYear() + ";" + (book.getOwnerId() != null ? library.getUserById(book.getOwnerId()).getName() : "") + "\n");
+            }
+        } catch (IOException e) {
+            System.err.println("Ошибка записи в файл: " + e.getMessage());
+        }
     }
 }

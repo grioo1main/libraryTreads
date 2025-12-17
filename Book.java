@@ -3,15 +3,26 @@ public class Book {
     private String name;
     private Integer year;
     private String author;
-    private User owner;
+    private Integer ownerId;
+    public Integer getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Integer ownerId) {
+        this.ownerId = ownerId;
+    }
+
+
+
     private static Integer stId = 0;
     private Integer id;
 
-    public Book(String name, Integer year, String author) {
+    public Book(String name, Integer year, String author , Integer ownerId) {
         this.name = name;
         this.year = year;
         this.author = author;
         this.id = ++stId;
+        this.ownerId = ownerId;
     }
 
     public Integer getId() {
@@ -46,17 +57,11 @@ public class Book {
         this.author = author;
     }
 
-    public User getOwner() {
-        return owner;
-    }
-
-    public void setOwner(User owner) {
-        this.owner = owner;
-    }
+    
 
     @Override
     public String toString() {
-        return author + " - "+ author + " " + name + " (" + year + ") | Owner " + (owner != null ? owner.getName() : "Нет владельца") +" | ID - " + id;
+        return author + " - "+ author + " " + name + " (" + year + ") | Owner " + (ownerId != null ? "ID владельца " + ownerId : "Нет владельца") +" | ID - " + id;
     }
 
 }

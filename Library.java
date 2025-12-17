@@ -29,4 +29,8 @@ public class Library {
         this.users = users;
     }
 
+    public User getUserById(Integer id){
+         return users.stream().filter(u -> u.getId() == id ).findFirst().get();
+    }
+
 }
